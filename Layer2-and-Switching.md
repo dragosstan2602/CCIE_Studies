@@ -66,4 +66,53 @@ forwarded out of Fa0/4 (with the necessary fields)
 5. SW2 will do the same
 
 #### Topology Change Notification and Updating the CAM
+![alt text](pics/STP03.png "Propagating Information About Topology Change")
+1. A TC event occurs on a port of a switch
+2. The SW sends a TCN BPDU out its RP every Hello timer until Ack
+3. The designated SW on that segment Ack that BPDU by sending a Hello with the TC Ack bit set
+4. The same SW sends the TCN BPDU upstream and the process repeats
+5. The Root bridge receives the TCN BPDU and sends a TC Ack
+6. For the MaxAge+ForwardDelay seconds the Root will send BPDUs with the TC bit set telling SWs to
+shorten their aging time for their MAC address tables to ForwardDelay secs
 
+#### Port states
+![alt text](pics/STP04.png "IEEE 802.1D Spanning Tree Interface States")
+
+## RSTP
+#### Port states
+![alt text](pics/RSTP01.png "IEEE 802.1D Spanning Tree Interface States")
+* A Discarding port continues to process received BPDUs; send BPDUs (depending on its role); 
+and send and receive frames of inter-switch signaling protocols such as DTP, VTP, CDP, LLDP, 
+PAgP, LACP, or LOOP.
+
+#### Port roles
+* Root Port - no changes
+* Designated Port - no changes
+* Alternate Port 
+    * A backup for an RP
+    * They receive BPDUs but don't meet the requirements to be a RP/DP
+    * When the RP goes down the AP receiving the best BPDU is RAPIDLY moved to that role
+* Backup Port 
+    * A backup for a DP
+    * They receive BPDUs but don't meet the requirements to be a DP
+    * When the DP fails the BP takeover is NOT RAPID (timer driven)
+
+![alt text](pics/RSTP02.png "RSTP Port Roles")
+
+#### Port types
+* Edge or Non-Edge
+* An Edge Port 
+    * Becomes DP immediately
+    * Sends BPDUs but doesn't expect to receive any
+    * If it receives a BPDU it moves to a Non-Edge type port
+    * The config doesn't change and it will go back to Edge when bounced
+
+#### Changes to BPDU Format and Handling
+In RSTP there's only one type of BPDU used. The TCN BPDU is no longer used.
+
+* In STP only the Root sends Config BPDUs. Non-root SWs relay Root BPDUs. Reaction is delayed in
+case of a failure - if a non-root SW stops receiving BPDUs it has to wait MaxAge-MessageAge seconds 
+for the BPDU stored on the Root Port to expire
+* in RSTP every SW sends its own BPDUs (based on the Root BPDUs) allowing SWs to age-out BPDUs faster
+3 x Hello interval). The MessageAge field no longer matters in BPDU expiry. Only as a hop count metric.
+Any BPDU whose MessageAge is equal to or higher than its MaxAge will be discarded upon arrival.
