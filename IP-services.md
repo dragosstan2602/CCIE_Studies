@@ -61,3 +61,6 @@ This is called a _broadcast_. It contains the IP of the dest host
     (round-robin fashion)
 ----------------------   
 # SNMP
+
+----------------------
+# DNS

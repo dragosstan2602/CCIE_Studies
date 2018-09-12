@@ -1,3 +1,5 @@
+# VLANs
+![alt text](pics/VLAN01.png "dot1Q frame")
 # STP
 ### STP Protocol Messages
 * BPDUs - Bridge Protocol Data Units \
