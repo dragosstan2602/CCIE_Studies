@@ -87,6 +87,23 @@
   * If all priorities are equal - highest RID becomes DR and second BDR
   * New routers don't preempt when coming online with a better priority
   
-## ISIS
+### OSPF Design and Areas
+![alt text](pics/OSPF03.png "OSPF Design Terminology")
+* OSPF Path Selection
+  * Intra-Area > Inter-Area
+  * ABRs ignore type 3 LSAs learned in a nonbackbone area during SPF calculation, which prevents an 
+  ABR from choosing a route that goes into a nonbackbone area and then back into the backbone.
+##### LSA Types
+![alt text](pics/OSPF04.png "OSPF LSA Types")
 
 ## BGP
+
+## ISIS
+
+## MPLS
+
+## DMVPN
+
+## IPSEC
+
+
