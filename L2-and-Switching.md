@@ -11,6 +11,10 @@ process:
     * Sender Bridge ID (SBID)
     * Sender Port ID (SPID)
     * Receiver Port ID (RPID; not included in the BPDU, evaluated locally)
+### STP Timers
+* Hello - 2s
+* Forward Delay - 15s
+* Max Age - 20s
 
 ### How it works
 1. Elect root bridge
