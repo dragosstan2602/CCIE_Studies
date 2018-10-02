@@ -254,7 +254,7 @@ bgp always-compare-med is enabled, BGP MED decisions are always deterministic.
 * AS_SET
   * Unordered list of the ASNs along the path
   * Useful in case of Aggregation
-#### BGP PATH SELECTION SEQUENCE
+### BGP PATH SELECTION SEQUENCE
 
 ###### 1. Prefer the route with the highest administrative weight. This is a Cisco-specific function, because BGP administrative weight is a Cisco parameter.
 ###### 2. If the weights are equal, prefer the route with the highest LOCAL_PREF value.
@@ -267,7 +267,8 @@ bgp always-compare-med is enabled, BGP MED decisions are always deterministic.
 ###### 9. If the routes are still equal, they are from the same neighboring AS, and BGP multipath is enabled with the maximum-paths command, install all the equal-cost routes in the Loc-RIB.
 ###### 10. If multipath is not enabled, prefer the route with the lowest BGP router ID.
 
-
+### BGP as-override vs allow-as-in
+[Case Study](case_studies/bgp-as-override-vs-allow-as-in.md)
 
 ## ISIS
 
