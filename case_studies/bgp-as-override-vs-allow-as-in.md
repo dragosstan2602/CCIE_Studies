@@ -2,6 +2,7 @@ These two functions are pretty similar, just with subtle differences. They can b
 environment where a customer is using one AS number for many sites that are connected to an ISP. 
 This is shown in the example below.
 ![alt text](../pics/BGP04.png "BGP as-override vs allow-as-in")
+\
 You can see that AS `65001` connects to the ISP at two locations. So when R2 receives the prefix 
 `99.99.99.99/32`, he will see that the AS path is via 1, `65001`. Because of the loop prevention 
 mechanism, R2 will have to reject this prefix because it can see its own AS in the `AS_PATH` 
