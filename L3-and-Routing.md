@@ -95,8 +95,179 @@
   ABR from choosing a route that goes into a nonbackbone area and then back into the backbone.
 ##### LSA Types
 ![alt text](pics/OSPF04.png "OSPF LSA Types")
+* LSA Considerations
+  * LSA3
+    * ABRs use only the LSA3s received over a backbone area in calcluating SPF. The others stored in
+    the LSDB and flooded but not used
+    * When an ABR creats and floods LSA3s from one area to another, only Intra-Area routes are 
+    flooded from nonbackbone to backbone and Inter and Intra-Area from the backbone
+  * LSA5
+    * E1 - external metric = metric to reach the ASBR + ASBR's advertised metric
+    * E2 = fixed metric (cisco default)
+    
+* OSPF Stubby Area Types
 
+![alt text](pics/OSPF05.png "OSPF Stubby Area Types")
+
+* OSPF Best Path
+
+![alt text](pics/OSPF06.png "OSPF Best Path")
+  
 ## BGP
+### BGP Features
+![alt text](pics/BGP01.png "BGP Features")
+
+### BGP Messages and Neighbor States
+* Open Message
+  * After TCP establishes both neigh send Open messages containing:
+    * BGP ver no
+    * ASN
+    * Hold Time - Max no of seconds befor receiving a Keepalive or Update
+    * BGP Identifier - BGP RID - same process as OSPF
+    * Optional params
+* Keepalive Message
+  * Sent if a router accepts the Open message params and every 60s (Cisco)
+* Update Message
+  * Advertises/withdraws routes
+    * Network Layer Reachbility Info (NLRI) - one or more tuples (Length, Prefix)
+    * Path Attributes
+    * Withdrawn Routes
+* Notification Messages
+  * Sent when an error message is detected and always closes the TCP session
+
+![alt text](pics/BGP02.png "BGP Neighbour States")
+
+* Idle
+  * Initial state
+  * No TCP connections accepted or attempted
+  * A Start event triggers BGP to initialize all BGP resources
+* Connect
+  * Sets the ConnectRetry timer
+  * Waiting for the TCP session to complete
+  * If it completes it sends the Open message and goes to OpenSent and clears the ConnectRetry timer
+  * If it fails it goes to Active and resets the ConnectRetry timer
+* Active
+  * Actively trying to open the TCP session
+  * If it succeeds it sends the Open message and goes to OpenSent and clears the ConnectRetry timer
+  * If the ConnectRetry timer expires it goes back to Connect
+  * If a neigh attempts to try a connection with an unexpected address it stays in Active
+  * Any other event sends it to Idle
+* OpenSent
+  * Open msg sent
+  * Open msg awaited - when received it checks the fields
+  * Errors trigger a Notification message and sends it to Idle
+  * If no errors - a Keepalive msg is sent and the Keepalive timer is set, hold timer is negotiated
+  with the smaller values winning
+  * Goes to OpenConfirm
+* OpenConfirm
+  * Waits for Keepalive or Notification
+  * Keepalive -> Established
+  * Notification -> Idle
+  * Hold timer expires -> Idle
+* Estgablished
+  * Neighbours are up
+  * Updates and Keepalives are exchanged (Hold timer is reset to 0 everytime one of them is received)
+  * Notification -> Idle
+  * Any other event -> Notification -> Idle
+  
+### BGP Path Attributes
+* Well-known mandatory - recognized by all BGP implem - added to all Updates
+* Well-known discretionary - recognized by all BGP implem
+* Optional transitive - a BGP process should accept the path in which it is included, even if it 
+  doesn't support the attribute, and it should pass the path on to its peers
+* Optional nontransitive
+
+![alt text](pics/BGP03.png "BGP Path Attributes")
+
+* Origin
+  * IGP - learned from IGP - highest pref
+  * EGP
+  * Incomplete - cannot determine to origine (redistribution usually) - lowest pref
+* AS_PATH
+  * Describes all the autonomous systems it has passed through, beginning with the most recent AS 
+  and ending with the originating AS - shorter is pref
+* NEXT_HOP
+  * If the ADV and REC routers are external peers, the Next Hop is the ADV router's iface
+  * If they are internal peers and the prefix is in the same ASN the Next Hop is the IP of the neigh
+  that advertised it
+  * If they are internal peers and the prefix is in a different ASN the Next Hop is the IP of the
+  external neigh which advertised the prefix
+* LOCAL_PREF
+  * Passed only to internal peers
+  * Higher pref
+* MULTI_EXIT_DISC
+  * Affects traffic leaving the AS
+  * Allows an AS to inform another AS of its preferred entry points
+  * Lowest pref
+  * Not passed beyond the receiving AS
+```
+Case study - bgp deterministic-med AND bgp always-compare-med
+For example, consider the following routes:
+
+    entry1: ASPATH 1, MED 100, internal, IGP metric to NEXT_HOP 10
+    entry2: ASPATH 2, MED 150, internal, IGP metric to NEXT_HOP 5
+    entry3: ASPATH 1, MED 200, external
+
+The order in which the BGP routes were received is entry3, entry2, and entry1 (entry3 is the oldest 
+entry in the BGP table and entry1 is the newest one).
+
+A BGP router with bgp deterministic-med disabled chooses entry2 over entry1, due to a lower IGP 
+metric to reach the NEXT_HOP (MED was not used in this decision because entry1 and entry2 are from 
+two different ASs). It then prefers entry3 over entry2 because it's external. However, entry3 has a 
+higher MED than entry1.
+
+If bgp deterministic-med is enabled, routes from the same AS are grouped together, and the best 
+entries of each group are compared. In the given example, there are two ASs, AS 1 and AS 2.
+
+    Group 1:  entry1: ASPATH 1, MED 100, internal, IGP metric to NEXT_HOP 10
+              entry3: ASPATH 1, MED 200, external
+    Group 2:  entry2: ASPATH 2, MED 150, internal, IGP metric to NEXT_HOP 5
+
+In Group 1, the best path is entry1 because of the lower MED (MED is used in this decision since 
+the paths are from the same AS). In Group 2, there is only one entry (entry2). The best path then 
+is determined by comparing the winners of each group (MED is not used in this comparison by default 
+because the winners of each group are from different ASs - enabling bgp always-compare-med changes 
+this default behavior). Now, when comparing entry1 (the winner from Group 1) and entry2 (the winner 
+from Group 2), entry2 will be the winner since it has the better IGP metric to the next hop.
+
+If bgp always-compare-med was also enabled then comparing entry1 (the winner from Group 1) and 
+entry 2 (the winner from Group 2), entry 1 will be the winner because of lower MED.
+
+Cisco recommends enabling bgp deterministic-med in all new network deployments. In addition, if 
+bgp always-compare-med is enabled, BGP MED decisions are always deterministic. 
+```
+* ATOMIC_AGGREGATE and AGGREGATOR
+  * When Aggregation happens some path info might be lost
+  * ATOMIC_AGGREGATE alerts downstream routers that a loss of path info has occured
+  * Receiving routers can't make NLRI information of that route more specific
+  * AGGREGATOR attribute informs downstream routers about where the aggregation was performed
+  * It includes the ASN and the IP of the router which performed the Aggregation
+* COMMUNITY
+  * Internet - routes belonging to this Comm are advertised freely
+  * NO_EXPORT - Cannot be advertised to another EBGP peers (or outside the Confederation)
+  * NO_ADVERTISE - Cannot be advertised to ANY peer
+  * LOCAL_AS - Cannot be advertised to another EBGP peer (including EBGP peers within a Confed)
+* ORIGINATOR_ID and CLUSTER_LIST
+  * Used in a RR setup
+  * ORIGINATOR_ID is the IP of the router which originated the prefix - created by the RR
+  * CLUSTER_LIST is a seq of RR cluster IDs through which the prefix has passed
+* AS_SET
+  * Unordered list of the ASNs along the path
+  * Useful in case of Aggregation
+#### BGP PATH SELECTION SEQUENCE
+
+###### 1. Prefer the route with the highest administrative weight. This is a Cisco-specific function, because BGP administrative weight is a Cisco parameter.
+###### 2. If the weights are equal, prefer the route with the highest LOCAL_PREF value.
+###### 3. If the LOCAL_PREF values are the same, prefer the route that was originated locally on the router. That is, prefer a route that was learned from an IGP on the same router.
+###### 4. If the LOCAL_PREF is the same, and no route was locally originated, prefer the route with the shortest AS_PATH.
+###### 5. If the AS_PATH length is the same, prefer the path with the lowest origin code. IGP is lower than EGP, which is lower than Incomplete.
+###### 6. If the origin codes are the same, prefer the route with the lowest MULTI_EXIT_DISC value. This comparison is done only if the AS number is the same for all the routes being considered.
+###### 7. If the MED is the same, prefer EBGP routes over confederation EBGP routes, and prefer confederation EBGP routes over IBGP routes.
+###### 8. If the routes are still equal, prefer the route with the shortest path to the BGP NEXT_HOP. This is the route with the lowest IGP metric to the next-hop router.
+###### 9. If the routes are still equal, they are from the same neighboring AS, and BGP multipath is enabled with the maximum-paths command, install all the equal-cost routes in the Loc-RIB.
+###### 10. If multipath is not enabled, prefer the route with the lowest BGP router ID.
+
+
 
 ## ISIS
 
