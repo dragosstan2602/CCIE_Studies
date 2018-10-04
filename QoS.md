@@ -1,15 +1,19 @@
 # QoS
 ### Classification & Marking
 * IP ToS Byte and DS Field Compared
+
 ![alt text](pics/QOS01.png "IP ToS Byte and DS Field Compared")
 
 * Default and Class Selector DSCP Values
+
 ![alt text](pics/QOS02.png "Default and Class Selector DSCP Values")
 
 * Assured Forwarding DSCP Values—Names, Binary Values, and Decimal Values
+
 ![alt text](pics/QOS03.png "Assured Forwarding DSCP Values—Names, Binary Values, and Decimal Values")
 
 * LAN CoS Fields
+
 ![alt text](pics/QOS04.png "LAN CoS Fields")
 
 ### Congestion Management & Avoidance
