@@ -273,9 +273,135 @@ bgp always-compare-med is enabled, BGP MED decisions are always deterministic.
 ## MPLS
 
 ## DMVPN
+##### NHRP Messages
+* NHRP Registration Request
+  * Spokes register their NBMA and VPN IPs with the Hub/NHS
+  * Required to build the spoke-to-hub tunnels
+* NHRP Resolution Request
+  * Spokes query the hub to NBMA-to-VPN mappings of other spokes
+  * Required to build spoke-to-spoke tunnels
+* NHRP Redirect
+  * NHS answer to a spoke-to-spoke data plane packet through it
+  * Similar to IP redirects
+  * Used only in DMVPN Phase 3 to build spoke-to-spoke tunnels
+  * WHen a H receives and sends a packet out the same iface it will send NHRP redirect to packet
+  source
+  * And forward original packet downt to S via RIB
+  * The source S will install an NHRP route into its routing table for the other S
+
+##### DMVPN Phases
+* Phase 1 (now oboslete)
+  * mGRE on the hub and p2p GRE on spokes
+  * NHRP is still required for spoke registration
+  * No spoke-to-spoke tunnels
+  * Routing
+    * Summarization/def routing at hub is allowed
+    * Next-hop on spokes is always changed by the hub
+* Phase 2 (now obsolete)
+  * mGRE on H and S
+  * NHRP required for H-to-S registration
+  * NHRP required for S-to-S registration
+  * S-to-S tunnel triggered by S
+  * Routing
+    * Summarization/def route is NOT allowed at H
+    * Next-hop on S is always preserved by the H
+    * Multi-level hierarchy required H daisy-chaining
+* Phase 3
+  * NHRP required for H-to-S registration
+  * NHRP required for S-to-S registration
+  * Routing
+    * Summarization/def routing at hub is allowed
+    * Results in HRP routes for S2S tunnel
+    * With `no-summary` Next-Hop Override is performed for S2S tunnels
+      * Next hop is changed from Hub IP to Spoke IP
+    * Next-Hop on S is always changed by the H
+    * Multi-level hierarchy works without daisy-chaining
 
 ## IPSEC
+##### Features
+* Data origin authentication
+* Data integrity
+* Data encryption
+* Data anti-replay
 
+##### Data structures
+* SA - security association
+  * An agreement of IPSec parameters
+  * Maintains encryption & authentication keys on peers
+* SPI - Security Parameter Index
+  * Field in the packet header to select SA on receiver
+  * Similar to VLAN header or MPLS label
+
+##### ISAKMP vs IKE
+* ISAKMP - Internet Sec Assoc and Key Mgmt Prot
+  * It's a framework
+  * Says that the auth and keying `should` occur
+* IKE - Internet Key Ex
+  * It's the actual implementation
+  * Defines `how` auth and keying occurs
+
+##### IPSec Tunnel Negotiation Phases
+* Phase 1
+  * Authenticate endpoints and built a secure tunnel for further negotiation
+  * The result is called ISAKMP SA
+* Phase 2
+  * Establish the tunnel used to protect the actual data traffic
+  * Result is called IPSec SA
+
+###### Phase 1
+* IKE Authentication
+  * Preshared Keys
+  * Certificates (PKI)
+  * IKEv2 adds improved auth
+
+* IKE Diffie-Hellman Group
+  *  Method used to exchange crypto keys
+  * DH group number determines the strength of keys (large group more secure, more CPU load)
+  * Result is the symmetric keys used in the encryption (by 3DES, AES etc)
+  
+* IKE Encryption
+  * 3DES, AES-128, etc
+  
+* IKE Hashing
+  * MD5, SHA-1, SHA-256
+  * Ensuring the packet was not modified in transit
+  
+* ISAKMP Policies
+  * Combination of IKE params
+  * IKE initiator sends all its policies through a proposal
+  * IKE responder checks received policies against its own
+  * First match is used based on lowest local priority value
+  * Connection is rejected otherwise
+* IPSec control plane
+  * ISAKMP - UDP 500
+  * UDP 4500 if going through NAT (NAT-T)
+###### Phase 2
+* Security Protocol
+  * ESP vs AH
+    * ESP - IP50
+      * Supports encryption
+      
+* Encapsulation Mode
+  * Tunnel vs Transport
+  * Transport Mode
+    * Original IP header retained
+    * Payload and L4 header auth/encr with ESP
+    * Complete packet auth with AH
+    * Host to host IPSec
+  * Tunnel Mode
+    * Adds new IP header
+    * Original header & payload auth/encr with ESP
+    * Complete packet auth with AH
+    * Between IPSec GWs or IPSec GW and host
+* Encryption
+  * 3DES, AES (different than Phase 1)
+* Authentication
+  * MD5, SHA-1 (different than Phase 1)
+* Proxy Identities or Encryption Domain
+* SA Lifetimes
+* Perfect Forward Secrecy (PFS)
+  * Should we re-neg DH before we re-key
+* Combination of these is called IPSec Transform Set
 ## ISIS
 
 
