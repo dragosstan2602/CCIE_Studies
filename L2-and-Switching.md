@@ -144,8 +144,8 @@ next layer.
     * a Non-Edge Non-Forwarding port moves to Forwarding
     * a BPDU with the TC flag set is received on a DP or RP
 * A SW that receives such a BPDU on its RP/DP port will do the following:
-    * Setup a tcWhile timer = Hello time plus one second on all DPs or RPs the one where the BPDU 
-    came from
+    * Setup a tcWhile timer = Hello time plus one second on all DPs or RPs including the one where 
+    the BPDU came from
     * Flush the MAC addresses of all of these ports
     * Flood BPDUs with the TC bit set on all of these ports
 
