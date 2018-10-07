@@ -120,10 +120,10 @@ In RSTP there's only one type of BPDU used. The TCN BPDU is no longer used.
 case of a failure - if a non-root SW stops receiving BPDUs it has to wait MaxAge-MessageAge seconds 
 for the BPDU stored on the Root Port to expire
 * in RSTP every SW sends its own BPDUs (based on the Root BPDUs) allowing SWs to age-out BPDUs faster
-3 x Hello interval). The MessageAge field no longer matters in BPDU expiry. Only as a hop count metric.
+(3 x Hello interval). The MessageAge field no longer matters in BPDU expiry. Only as a hop count metric.
 Any BPDU whose MessageAge is equal to or higher than its MaxAge will be discarded upon arrival.
 
-![alt text](pics/RSTP03.jpg "RSTP Indirect Link Failure")
+![alt text](pics/RSTP03.JPG "RSTP Indirect Link Failure")
 
 * Recovery from a _lost connectivity_ to the root bridge:
     * In STP if a SW receives an inferior BPDU it ignores it until its superior BPDU is aged out.
@@ -131,7 +131,7 @@ Any BPDU whose MessageAge is equal to or higher than its MaxAge will be discarde
 
 #### Proposal/Agreement Process in RSTP
 * _New link_ issues:
-![alt text](pics/RSTP04.jpg "Proposal/Agreement Mechanism in RSTP")
+![alt text](pics/RSTP04.JPG "Proposal/Agreement Mechanism in RSTP")
 
 When a SW receives a BPDU on its RP with the Proposal bit set, it moves all its Non-Edge DPs to 
 Discarding state (the proceess is called Sync) and also the RP. After the agreement with the 
