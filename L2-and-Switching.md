@@ -131,6 +131,7 @@ Any BPDU whose MessageAge is equal to or higher than its MaxAge will be discarde
 
 #### Proposal/Agreement Process in RSTP
 * _New link_ issues:
+
 ![alt text](pics/RSTP04.JPG "Proposal/Agreement Mechanism in RSTP")
 
 When a SW receives a BPDU on its RP with the Proposal bit set, it moves all its Non-Edge DPs to 
