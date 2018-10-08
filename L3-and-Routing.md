@@ -413,38 +413,3 @@ Components:
   * Should we re-neg DH before we re-key
 * Combination of these is called IPSec Transform Set
 
-## IPv6
-##### Address Types
-* Unspecified - `::/128`
-* Loopback - `::1/128`
-* Multicast - `11111111` or `FF00::/8`
-* Link-local unicast - `1111111010` or `FE80::/10`
-  * Not routable
-  * Used for SLAAC
-  * Used for Neigh Discovery
-  * Used for Router Discovery
-* Unique Local Addresses - `1111110` or `FC00::/7`
-  * Private use
-  * Not routable via global BGP
-* Global Unicast - everything else
-  * Used for routing
-  * End hosts MUST:
-    * have a 64 bit iface ID - `nnnn:nnnn:nnnn:nnnn:hhhh:hhhh:hhhh:hhhh/64`
-    * use EUI-64 format for iface ID
-##### IPv6 Address Resolution
-* ICMPv6 Neighbour Discovery used for L3 to L2 resolution
-* Messages:
-  * Neigh Solicitation (NS)
-  * Neigh Advertisement (NA)
-  * ![alt text](pics/IPv601.png "IPv6 NS and NA")
-  * Router Solicitation (RS)
-    * Sent when a host comes online on a net segment that corresponds to the iface of the host
-    * Sent to all router multicast - `ff02::2`
-    * SRC - null `::` or link-local address
-  * Router Advertisement (RA)
-    * Replay to RS - unicast
-    * periodically to all hosts - `ff02::1`
-    * SRC - link local address that corresponds to the iface of the router
-  * Redirect
-    * To point the host to another (better) router
-    * or to point the host to another actual host on the link
