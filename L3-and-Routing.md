@@ -47,7 +47,7 @@
   * Same area type (regular, stub etc)
   * Must not have duplicate RIDs
   * OSPF timers must match
-  * **MTU must be equal forthe DBD packets to be exchanged correctly. It would affect ExStart and 
+  * **MTU must be equal for the DBD packets to be exchanged correctly. It would affect ExStart and 
   Exchange but routers can become neighbours up to and including 2-Way**
 
 ### DBD Exchange: Master/Slave Relationship
